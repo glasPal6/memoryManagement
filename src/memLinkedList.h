@@ -8,11 +8,12 @@
 // #define free(X) linkedListFree(X, __FILE__, __LINE__, __FUNCTION__)
 // ----------------------------------------------------------------------------
 
-void *linkedListMalloc(size_t size, const char *file, int line,
+void *linkedListMalloc(size_t size, const char *src_file, int line,
                        const char *func);
-void *linkedListFree(void *ptr, const char *file, int line, const char *func);
+void *linkedListFree(void *ptr, const char *src_file, int line,
+                     const char *func);
 
-void printMemoryLog();
+void printMemoryLog(FILE *file);
 
 #ifdef MEMMANAGEMENT_LL
 
@@ -25,18 +26,20 @@ typedef struct Node {
 } Node;
 Node *head = NULL;
 
-void *linkedListMalloc(size_t size, const char *file, int line,
+void *linkedListMalloc(size_t size, const char *src_file, int line,
                        const char *func) {
     void *ptr = malloc(size);
     if (ptr == NULL) {
-        printf("Error: malloc failed in %s:%d:%s\n", file, line, func);
+        printf("Error: malloc failed in %s:%d:%s\n", src_file, line, func);
     }
-    printf("Allocated: %s, %i, %s, %p[%li]\n", file, line, func, ptr, size);
+#ifdef MEMMANAGEMENT_PRINT
+    printf("Allocated: %s, %i, %s, %p[%li]\n", src_file, line, func, ptr, size);
+#endif
 
     if (head == NULL) {
         head = malloc(sizeof(Node));
         head->next = NULL;
-        head->file = file;
+        head->file = src_file;
         head->line = line;
         head->func = func;
         head->ptr = ptr;
@@ -47,7 +50,7 @@ void *linkedListMalloc(size_t size, const char *file, int line,
         }
         current->next = malloc(sizeof(Node));
         current->next->next = NULL;
-        current->next->file = file;
+        current->next->file = src_file;
         current->next->line = line;
         current->next->func = func;
         current->next->ptr = ptr;
@@ -56,9 +59,11 @@ void *linkedListMalloc(size_t size, const char *file, int line,
     return ptr;
 }
 
-void *linkedListFree(void *ptr, const char *file, int line, const char *func) {
+void *linkedListFree(void *ptr, const char *src_file, int line,
+                     const char *func) {
     if (head == NULL) {
-        printf("Error: linkedListFree failed in %s:%d:%s\n", file, line, func);
+        printf("Error: linkedListFree failed in %s:%d:%s\n", src_file, line,
+               func);
     } else if (head->next == NULL) {
         if (head->ptr == ptr) {
             free(head);
@@ -79,18 +84,20 @@ void *linkedListFree(void *ptr, const char *file, int line, const char *func) {
     }
 
     free(ptr);
-    printf("Freed: %s, %i, %s, %p\n", file, line, func, ptr);
+#ifdef MEMMANAGEMENT_PRINT
+    printf("Freed: %s, %i, %s, %p\n", src_file, line, func, ptr);
+#endif
 
     return NULL;
 }
 
-void printMemoryLog() {
+void printMemoryLog(FILE *file) {
     if (head != NULL)
-        printf("\nFile, Line, Function, Pointer\n");
+        fprintf(file, "File, Line, Function, Pointer\n");
     Node *current = head;
     while (current != NULL) {
-        printf("%s, %i, %s, %p\n", current->file, current->line, current->func,
-               current->ptr);
+        fprintf(file, "%s, %i, %s, %p\n", current->file, current->line,
+                current->func, current->ptr);
         Node *temp = current;
         current = current->next;
         free(temp->ptr);

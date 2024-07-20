@@ -16,12 +16,13 @@ add_executable(${TEST_NAME}
 target_compile_definitions(${TEST_NAME}
 PRIVATE
     MEMMANAGEMENT_LL
+    MEMMANAGEMENT_PRINT
 )
 
 target_compile_options(${TEST_NAME}
 PRIVATE
-#     -Wall
-#     -Werror
-#     -Wextra
+    # -Wall
+    # -Werror
+    # -Wextra
 )
 

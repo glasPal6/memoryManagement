@@ -1,6 +1,6 @@
+#include <stdio.h>
 
 #include "memLinkedList.h"
-#include <stdio.h>
 #define malloc(X) linkedListMalloc(X, __FILE__, __LINE__, __FUNCTION__)
 #define free(X) linkedListFree(X, __FILE__, __LINE__, __FUNCTION__)
 
@@ -25,6 +25,7 @@ int main() {
     // Basic non free
     printf("\nBasic non free\n");
     char *ptr6 = malloc(sizeof(char));
+    /*free(ptr6);*/
 
     // One not freed
     printf("\nDifferent order of allocations and frees with one not freed\n");
@@ -35,6 +36,9 @@ int main() {
     /*free(ptr8);*/
     free(ptr7);
 
-    printMemoryLog();
+    FILE *log_file = fopen("log_memory.txt", "w");
+    printMemoryLog(log_file);
+    /*printMemoryLog(stdout);*/
+    fclose(log_file);
     return 0;
 }
