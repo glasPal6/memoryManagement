@@ -24,3 +24,7 @@ To print allocations and frees set MEMMANAGEMENT_PRINT like MEMMANAGEMENT_LL.
 
 > [!NOTE]
 Any hanging memory is freed when `printMemoryLog` is called.
+
+## Future Work
+- Add the rest of the memory allocation functions.
+- It would be cool to add more functionality to the program.
