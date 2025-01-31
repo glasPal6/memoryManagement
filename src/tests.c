@@ -1,10 +1,13 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "memLinkedList.h"
 #define malloc(X) linkedListMalloc(X, __FILE__, __LINE__, __FUNCTION__)
 #define free(X) linkedListFree(X, __FILE__, __LINE__, __FUNCTION__)
 
 int main() {
+    atexit(memoryLog);
+
     // Basic test
     printf("Basic allocation and free\n");
     int *ptr = malloc(sizeof(int));
@@ -36,9 +39,5 @@ int main() {
     /*free(ptr8);*/
     free(ptr7);
 
-    FILE *log_file = fopen("log_memory.txt", "w");
-    printMemoryLog(log_file);
-    /*printMemoryLog(stdout);*/
-    fclose(log_file);
     return 0;
 }

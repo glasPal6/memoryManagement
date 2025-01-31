@@ -105,4 +105,10 @@ void printMemoryLog(FILE *file) {
     }
 }
 
+void memoryLog() {
+    FILE *log_file = fopen("memory_not_freed.txt", "w");
+    printMemoryLog(log_file);
+    fclose(log_file);
+}
+
 #endif // MEMMANAGEMENT_LL
