@@ -1,20 +1,81 @@
-# Basic Memory Linked list
+# Basic Memory Linked List
 
-Valgrind is cool, but I wanted something simpilar to use which could be used as a plug and play of malloc and free.
-The idea is to store the addresses and locations of the blocks in a linked list, then you can see if memory blocks are freed or not.
-If the memory is not freed, then it is freed when written out to a log file.
+Simple C memory tracker for debugging, plug-and-play alternative to Valgrind for small projects or quick checks.
+Tracks all allocations/frees using singly linked list, logs unfreed (leaked) pointers at exit, and frees them automatically.
 
-## Use
+## What This Is For
+- Plug-in tool to find memory leaks in small C projects
+- Wraps malloc/free to track allocations
+- Dumps log of all unfreed allocations on exit (filename, line, function, pointer)
+- Also frees any missed memory
+## Usage
 
-Included `memLinkedList.h` in your project. It is a stb format so you need to define MEMMANAGEMENT_LL in your project before including it.
-Use the definitions at the top of the file to change malloc and free to the impleneted functions. 
-At the start of the program call `atexit(memoryLog);` to print the memory log when the program exits.
+1. **Add the header:**
+   ```c
+   #include "memLinkedList.h"
+   ```
+   Place this in your `.c` file.
+
+2. **Enable the memory tracker:**
+   Before including the header, set:
+   ```c
+   #define MEMMANAGEMENT_LL
+   #include "memLinkedList.h"
+   ```
+
+3. **[Optional] Enable diagnostic prints:**
+   To show every alloc/free in the terminal, also define:
+   ```c
+   #define MEMMANAGEMENT_PRINT
+   ```
+   before including the header.
+
+4. **Redirect malloc/free:**
+   Define these macros *after* the header include (or in just your tests):
+   ```c
+   #define malloc(X) linkedListMalloc(X, __FILE__, __LINE__, __FUNCTION__)
+   #define free(X) linkedListFree(X, __FILE__, __LINE__, __FUNCTION__)
+   ```
+   All malloc/free calls will be tracked (no code rewrite).
+
+5. **Hook memory log at exit:**
+   At start of `main()`:
+   ```c
+   atexit(memoryLog); // dumps leak info and cleans up
+   ```
+
+6. **Example:**
+   ```c
+   // enable tracker and [optional] prints
+   #define MEMMANAGEMENT_LL
+   // #define MEMMANAGEMENT_PRINT
+   #include "memLinkedList.h"
+   #define malloc(X) linkedListMalloc(X, __FILE__, __LINE__, __FUNCTION__)
+   #define free(X) linkedListFree(X, __FILE__, __LINE__, __FUNCTION__)
+
+   int main() {
+       atexit(memoryLog);
+       int* x = malloc(sizeof(int));
+       int* y = malloc(sizeof(int));
+       free(x);
+       // y intentionally not freed
+       return 0;
+   }
+   ```
+
+7. **Run your program.**
+   On exit, if anything not freed, tracker writes `memory_not_freed.txt`:
+   ```
+   File, Line, Function, Pointer
+   main.c, 10, main, 0x12345678
+   ```
+   and frees remaining memory automatically.
+
 > [!NOTE]
-> Calling `memoryLog` will free all memory that has not been freed.
-
-To print allocations and frees set MEMMANAGEMENT_PRINT like MEMMANAGEMENT_LL.
+> Calling `memoryLog` will free all memory that has not been freed and write log file.
 
 ## Future Work
-- Add the rest of the memory allocation functions.
-- Change the storage from a linked list to a binary tree.
-- It would be cool to add more functionality to the program.
+- Add calloc/realloc tracking
+- Binary tree for faster lookup
+- Smarter diagnostics (double free, buffer overruns)
+- Wider API (stats, live inspection)
